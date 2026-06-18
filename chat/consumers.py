@@ -12,6 +12,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     ## 1. connect
     async def connect(self):
         
+        self.user = self.scope["user"]
+
+        # Reject connection if not logged in
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+        
         print(self.channel_layer)
         print(self.channel_name)
         print(self.scope)
@@ -96,6 +103,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     ## 3. disconnect
     async def disconnect(self, code):
+        if not hasattr(self, "room_name"):  
+            return
+        
+        
         await self.channel_layer.group_send(
         self.room_name,
         {
